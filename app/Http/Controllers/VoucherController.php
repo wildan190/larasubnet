@@ -35,7 +35,7 @@ public function storeMultiple(Request $request)
             'name' => 'required|string|max:255',
             'voucher_code' => 'required|string|unique:vouchers,voucher_code|max:255',
             'description' => 'nullable|string',
-            'size' => 'required|string|max:255',
+            'size' => 'required|string|max:5',
             'duration' => 'required|integer',
             'price' => 'required|numeric',
         ])->validate();
