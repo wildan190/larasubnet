@@ -19,7 +19,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/vouchers', [VoucherController::class, 'index'])->name('admin.vouchers.index');
     Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('admin.vouchers.create');
-    Route::post('/vouchers', [VoucherController::class, 'store'])->name('admin.vouchers.store');
+    Route::post('/vouchers', [VoucherController::class, 'storeMultiple'])->name('admin.vouchers.storeMultiple');
     Route::get('/vouchers/{id}', [VoucherController::class, 'show'])->name('admin.vouchers.show');
     Route::get('/vouchers/{id}/edit', [VoucherController::class, 'edit'])->name('admin.vouchers.edit');
     Route::put('/vouchers/{id}', [VoucherController::class, 'update'])->name('admin.vouchers.update');

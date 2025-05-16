@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class VoucherController extends Controller
 {
@@ -25,24 +26,25 @@ class VoucherController extends Controller
     }
 
     // Menyimpan voucher baru ke database
-    public function store(Request $request)
-    {
-        // Validasi input dari form
-        $validated = $request->validate([
+public function storeMultiple(Request $request)
+{
+    $vouchersData = $request->input('vouchers');
+
+    foreach ($vouchersData as $index => $voucherData) {
+        $validated = Validator::make($voucherData, [
             'name' => 'required|string|max:255',
             'voucher_code' => 'required|string|unique:vouchers,voucher_code|max:255',
             'description' => 'nullable|string',
             'size' => 'required|string|max:255',
             'duration' => 'required|integer',
             'price' => 'required|numeric',
-        ]);
+        ])->validate();
 
-        // Membuat voucher baru dengan data yang sudah divalidasi
         Voucher::create($validated);
-
-        // Redirect ke daftar voucher
-        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher berhasil dibuat!');
     }
+
+    return redirect()->route('admin.vouchers.index')->with('success', 'Vouchers berhasil dibuat!');
+}
 
     // Menampilkan detail voucher berdasarkan ID
     public function show($id)
