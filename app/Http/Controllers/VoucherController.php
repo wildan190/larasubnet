@@ -38,23 +38,23 @@ public function index(Request $request)
     // Ambil semua hasil dulu, ordered by name
     $allVouchers = $query->orderBy('name')->get();
 
-    // Group hasil berdasarkan name (nama voucher)
+    // Group hasil berdasarkan nama voucher
     $grouped = $allVouchers->groupBy('name');
 
     $voucherGroups = [];
 
-    // Buat paginator manual untuk setiap grup
     foreach ($grouped as $groupName => $vouchers) {
-        $pageName = "page_{$groupName}";
+        $groupHash = md5($groupName);
+        $pageName = "page_{$groupHash}";
 
-        // Resolve current page dengan nama parameter khusus untuk setiap grup
+        // Resolve current page untuk grup ini
         $currentPage = LengthAwarePaginator::resolveCurrentPage($pageName);
         $perPage = 5;
 
         // Ambil slice data untuk current page
         $itemsForPage = $vouchers->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
-        // Buat paginator
+        // Buat paginator dengan pageName khusus (page_{groupHash})
         $paginator = new LengthAwarePaginator(
             $itemsForPage,
             $vouchers->count(),
@@ -63,17 +63,18 @@ public function index(Request $request)
             [
                 'path' => LengthAwarePaginator::resolveCurrentPath(),
                 'pageName' => $pageName,
-                'query' => $request->except($pageName), // agar query string filter tetap terjaga
+                'query' => $request->except($pageName), // agar query filter lain tetap dipertahankan
             ]
         );
 
-        $voucherGroups[$groupName] = $paginator;
+        $voucherGroups[$groupName] = [
+            'hash' => $groupHash,
+            'paginator' => $paginator,
+        ];
     }
 
     return view('admin.vouchers.index', compact('voucherGroups'));
 }
-
-
     // Menampilkan form untuk membuat voucher baru
     public function create()
     {

@@ -57,4 +57,17 @@
     <div class="voucher-group-pagination mt-3 d-flex justify-content-center">
         {!! $paginator->withQueryString()->links('pagination::bootstrap-5') !!}
     </div>
+
+    <style>
+        /* Optional: biar tabel responsive dengan scrollbar horizontal */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        /* Agar aksi form dan tombol rapih dalam 1 baris */
+        .voucher-group-pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+    </style>
 @endif

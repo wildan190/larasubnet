@@ -41,34 +41,32 @@
     @endif
 
     <div class="accordion" id="voucherAccordion">
-        @foreach($voucherGroups as $groupName => $vouchers)
+        @foreach($voucherGroups as $groupName => $groupData)
             @php
-                $groupHash = md5($groupName);
+                $groupHash = $groupData['hash'];
+                $paginator = $groupData['paginator'];
                 $collapseId = 'collapse' . $groupHash;
                 $headingId = 'heading' . $groupHash;
-                $pageName = $vouchers->getPageName();
             @endphp
             <div class="accordion-item mb-3 shadow-sm">
                 <h2 class="accordion-header" id="{{ $headingId }}">
-                    <!-- Hapus data-bs-toggle dan data-bs-target supaya tidak bisa collapse -->
                     <button class="accordion-button" type="button" aria-expanded="true" aria-controls="{{ $collapseId }}">
                         <div class="d-flex justify-content-between w-100 align-items-center">
                             <span>{{ $groupName }}</span>
-                            <span class="badge bg-secondary">{{ $vouchers->total() }} item(s)</span>
+                            <span class="badge bg-secondary">{{ $paginator->total() }} item(s)</span>
                         </div>
                     </button>
                 </h2>
-                <!-- Tetap show, hapus data-bs-parent supaya tidak auto collapse -->
                 <div id="{{ $collapseId }}" class="accordion-collapse collapse show" aria-labelledby="{{ $headingId }}">
                     <div class="accordion-body p-0" id="voucher-group-{{ $groupHash }}">
-                        @include('admin.vouchers._voucher_group_table', ['paginator' => $vouchers])
+                        @include('admin.vouchers._voucher_group_table', ['paginator' => $paginator])
                     </div>
                 </div>
             </div>
         @endforeach
     </div>
 
-    {{-- Pagination grup frontend --}}
+    {{-- Pagination grup frontend (accordion grup pagination) --}}
     <div id="groupPagination" class="d-flex justify-content-center mt-3"></div>
 </div>
 
@@ -77,8 +75,8 @@
 
 <script>
 $(document).ready(function () {
-    // Karena accordion gak collapsible, hapus event collapse handling
 
+    // Handle click pagination di tiap accordion group
     $('#voucherAccordion').on('click', '.pagination a', function(e) {
         e.preventDefault();
 
@@ -86,12 +84,15 @@ $(document).ready(function () {
         if (!url) return;
 
         let params = new URLSearchParams(url.split('?')[1]);
-        let pageParam = [...params.keys()].find(k => k.startsWith('page'));
+        // Cari param yang dimulai dengan 'page_'
+        let pageParam = [...params.keys()].find(k => k.startsWith('page_'));
         if (!pageParam) return;
 
+        // Ambil groupHash dari pageParam
         let groupHash = pageParam.replace('page_', '');
 
-        var $targetGroup = groupHash ? $('#voucher-group-' + groupHash) : $('#voucherAccordion');
+        // Target container sesuai groupHash
+        var $targetGroup = $('#voucher-group-' + groupHash);
         if ($targetGroup.length === 0) $targetGroup = $('#voucherAccordion');
 
         $.ajax({
@@ -99,10 +100,9 @@ $(document).ready(function () {
             type: 'GET',
             dataType: 'html',
             success: function(data) {
+                // Ambil konten voucher-group sesuai id dari response
                 var newHtml = $(data).find('#' + $targetGroup.attr('id')).html();
                 $targetGroup.html(newHtml);
-
-                // Tidak perlu buka collapse dan scroll ke atas karena accordion selalu terbuka
             },
             error: function() {
                 alert('Gagal memuat data. Silakan coba lagi.');
@@ -110,8 +110,7 @@ $(document).ready(function () {
         });
     });
 
-
-    // Pagination grup untuk accordion jika grup > 10
+    // Pagination untuk grup accordion jika grupnya banyak
     const maxGroupsPerPage = 10;
     const $groups = $('#voucherAccordion .accordion-item');
     const totalGroups = $groups.length;
@@ -126,13 +125,13 @@ $(document).ready(function () {
             return; // Tidak perlu pagination kalau cuma 1 page
         }
 
-        // Show/hide grup sesuai halaman
+        // Tampilkan grup sesuai halaman
         $groups.hide();
         const startIndex = (currentPage - 1) * maxGroupsPerPage;
         const endIndex = startIndex + maxGroupsPerPage;
         $groups.slice(startIndex, endIndex).show();
 
-        // Render tombol pagination
+        // Render tombol pagination grup
         for (let i = 1; i <= totalPages; i++) {
             const $btn = $('<button>')
                 .addClass('btn btn-sm me-1 ' + (i === currentPage ? 'btn-primary' : 'btn-outline-primary'))
@@ -143,17 +142,17 @@ $(document).ready(function () {
         }
     }
 
-    // Handle klik pagination grup
+    // Event klik pagination grup accordion
     $paginationContainer.on('click', 'button', function () {
         const page = parseInt($(this).attr('data-page'));
         if (page) {
             renderGroupPagination(page);
-            // Scroll ke atas accordion supaya user jelas lihat grup pertama page baru
+            // Scroll ke atas accordion agar user lihat jelas grup pertama page baru
             $('html, body').animate({ scrollTop: $('#voucherAccordion').offset().top }, 300);
         }
     });
 
-    // Initial render
+    // Initial render grup pagination
     renderGroupPagination(1);
 });
 </script>
