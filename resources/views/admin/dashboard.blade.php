@@ -12,7 +12,9 @@
             <div class="card text-white bg-success h-100">
                 <div class="card-header">Total Pendapatan</div>
                 <div class="card-body d-flex flex-column justify-content-center">
-                    <h5 class="card-title text-center">Rp. {{ number_format($totalRevenue, 0, ',', '.') }}</h5>
+                    <h5 class="card-title text-center">
+                        Rp. {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}
+                    </h5>
                 </div>
             </div>
         </div>
@@ -20,7 +22,9 @@
             <div class="card text-white bg-primary h-100">
                 <div class="card-header">Total Transaksi Settlement</div>
                 <div class="card-body d-flex flex-column justify-content-center">
-                    <h5 class="card-title text-center">{{ $totalTransactions }}</h5>
+                    <h5 class="card-title text-center">
+                        {{ $totalTransactions ?? 0 }}
+                    </h5>
                 </div>
             </div>
         </div>
@@ -28,7 +32,9 @@
             <div class="card text-white bg-warning h-100">
                 <div class="card-header">Total Voucher Terjual</div>
                 <div class="card-body d-flex flex-column justify-content-center">
-                    <h5 class="card-title text-center">{{ $totalVouchers }}</h5>
+                    <h5 class="card-title text-center">
+                        {{ $totalVouchers ?? 0 }}
+                    </h5>
                 </div>
             </div>
         </div>
@@ -40,7 +46,44 @@
             Grafik Pendapatan Bulanan
         </div>
         <div class="card-body">
-            <canvas id="revenueChart" style="width: 100%; height: 300px;"></canvas>
+            @if(count($months) > 0)
+                <canvas id="revenueChart" style="width: 100%; height: 300px;"></canvas>
+            @else
+                <div class="alert alert-warning text-center">
+                    Grafik tidak tersedia karena tidak ada data transaksi.
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- 🔹 Tabel Voucher Belum Terjual -->
+    <div class="card mt-4">
+        <div class="card-header">
+            Daftar Voucher Belum Terjual
+        </div>
+        <div class="card-body">
+            @if(count($unsoldVouchers) > 0)
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nama Voucher</th>
+                            <th>Jumlah Tersisa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($unsoldVouchers as $voucher)
+                            <tr>
+                                <td>{{ $voucher->name }}</td>
+                                <td>{{ $voucher->total }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <div class="alert alert-info text-center">
+                    Tidak ada voucher yang belum terjual.
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -51,48 +94,50 @@
 <!-- 🔹 Script untuk menampilkan Chart.js -->
 <script>
     // Inisialisasi Chart.js
-    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const ctx = document.getElementById('revenueChart')?.getContext('2d');
 
     // Parsing data bulanan ke format yang dibaca oleh Chart.js
-    const labels = @json($months->map(function($month) { return date('F Y', strtotime($month)); }));
-    const data = @json($totals);
+    const labels = @json($months->map(function($month) { return date('F Y', strtotime($month)); }) ?? []);
+    const data = @json($totals ?? []);
 
-    const revenueChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Pendapatan (Rp)',
-                data: data,
-                borderColor: '#4CAF50',
-                backgroundColor: 'rgba(76, 175, 80, 0.5)',
-                fill: true,
-                tension: 0.1,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return 'Rp. ' + value.toLocaleString();
+    if (ctx) {
+        const revenueChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Pendapatan (Rp)',
+                    data: data,
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.5)',
+                    fill: true,
+                    tension: 0.1,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp. ' + value.toLocaleString();
+                            }
                         }
                     }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            return 'Rp. ' + tooltipItem.raw.toLocaleString();
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return 'Rp. ' + tooltipItem.raw.toLocaleString();
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 </script>
 @endsection
