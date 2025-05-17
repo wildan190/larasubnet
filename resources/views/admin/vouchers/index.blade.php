@@ -11,6 +11,25 @@
             </a>
         </div>
 
+        <form method="GET" action="{{ route('admin.vouchers.index') }}" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <input type="text" name="voucher_name" class="form-control" placeholder="Cari Nama Voucher" value="{{ request('voucher_name') }}">
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="size" class="form-control" placeholder="Ukuran" value="{{ request('size') }}">
+    </div>
+    <div class="col-md-2">
+        <input type="number" name="duration" class="form-control" placeholder="Durasi (Hari)" value="{{ request('duration') }}">
+    </div>
+    <div class="col-md-2">
+        <input type="number" name="price" class="form-control" placeholder="Harga" value="{{ request('price') }}">
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Cari</button>
+    </div>
+</form>
+
+
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}

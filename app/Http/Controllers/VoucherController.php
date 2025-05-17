@@ -10,14 +10,31 @@ use Illuminate\Support\Facades\Validator;
 class VoucherController extends Controller
 {
     // Menampilkan daftar semua voucher
-    public function index()
-    {
-        // Mengambil data voucher dengan pagination
-        $vouchers = Voucher::paginate(20); // 10 data per halaman
+public function index(Request $request)
+{
+    $query = Voucher::query();
 
-        // Mengembalikan view dengan data vouchers dan pagination
-        return view('admin.vouchers.index', compact('vouchers'));
+    if ($request->has('size') && $request->size != '') {
+        $query->where('size', $request->size);
     }
+
+    if ($request->has('voucher_name') && $request->voucher_name != '') {
+        $query->where('name', 'like', '%' . $request->voucher_name . '%');
+    }
+
+    if ($request->has('duration') && $request->duration != '') {
+        $query->where('duration', $request->duration);
+    }
+
+    if ($request->has('price') && $request->price != '') {
+        $query->where('price', $request->price);
+    }
+
+    $vouchers = $query->paginate(20);
+
+    return view('admin.vouchers.index', compact('vouchers'));
+}
+
 
     // Menampilkan form untuk membuat voucher baru
     public function create()
