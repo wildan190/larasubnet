@@ -24,5 +24,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/vouchers/{id}/edit', [VoucherController::class, 'edit'])->name('admin.vouchers.edit');
     Route::put('/vouchers/{id}', [VoucherController::class, 'update'])->name('admin.vouchers.update');
     Route::delete('/vouchers/{id}', [VoucherController::class, 'destroy'])->name('admin.vouchers.destroy');
+
+    Route::get('admin/vouchers/group-data', [VoucherController::class, 'groupData'])
+    ->name('admin.vouchers.groupData');
+
     // Anda bisa menambahkan rute lainnya di dalam grup ini jika diperlukan
 });

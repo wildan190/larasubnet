@@ -6,33 +6,71 @@ use App\Http\Controllers\Controller;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class VoucherController extends Controller
 {
-    // Menampilkan daftar semua voucher
 public function index(Request $request)
 {
-    $query = Voucher::query();
+    $voucherName = $request->input('voucher_name');
+    $size = $request->input('size');
+    $duration = $request->input('duration');
+    $price = $request->input('price');
 
-    if ($request->has('size') && $request->size != '') {
-        $query->where('size', $request->size);
+    // Mulai query, ambil voucher yang belum terjual
+    $query = Voucher::query()->where('isSold', false);
+
+    // Filter dinamis jika parameter ada
+    if (!empty($voucherName)) {
+        $query->where('name', 'like', '%' . $voucherName . '%');
+    }
+    if (!empty($size)) {
+        $query->where('size', $size);
+    }
+    if (!empty($duration)) {
+        $query->where('duration', $duration);
+    }
+    if (!empty($price)) {
+        $query->where('price', '<=', $price);
     }
 
-    if ($request->has('voucher_name') && $request->voucher_name != '') {
-        $query->where('name', 'like', '%' . $request->voucher_name . '%');
+    // Ambil semua hasil dulu, ordered by name
+    $allVouchers = $query->orderBy('name')->get();
+
+    // Group hasil berdasarkan name (nama voucher)
+    $grouped = $allVouchers->groupBy('name');
+
+    $voucherGroups = [];
+
+    // Buat paginator manual untuk setiap grup
+    foreach ($grouped as $groupName => $vouchers) {
+        $pageName = "page_{$groupName}";
+
+        // Resolve current page dengan nama parameter khusus untuk setiap grup
+        $currentPage = LengthAwarePaginator::resolveCurrentPage($pageName);
+        $perPage = 5;
+
+        // Ambil slice data untuk current page
+        $itemsForPage = $vouchers->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        // Buat paginator
+        $paginator = new LengthAwarePaginator(
+            $itemsForPage,
+            $vouchers->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'pageName' => $pageName,
+                'query' => $request->except($pageName), // agar query string filter tetap terjaga
+            ]
+        );
+
+        $voucherGroups[$groupName] = $paginator;
     }
 
-    if ($request->has('duration') && $request->duration != '') {
-        $query->where('duration', $request->duration);
-    }
-
-    if ($request->has('price') && $request->price != '') {
-        $query->where('price', $request->price);
-    }
-
-    $vouchers = $query->paginate(20);
-
-    return view('admin.vouchers.index', compact('vouchers'));
+    return view('admin.vouchers.index', compact('voucherGroups'));
 }
 
 
@@ -112,4 +150,20 @@ public function storeMultiple(Request $request)
         // Redirect ke daftar voucher dengan pesan sukses
         return redirect()->route('admin.vouchers.index')->with('success', 'Voucher berhasil dihapus!');
     }
+
+    public function groupData(Request $request)
+{
+    $groupName = $request->query('group');
+
+    // Ambil voucher berdasar grup (misal berdasarkan size atau nama grup sesuai logika kamu)
+    // Contoh asumsi: $voucherGroups adalah koleksi keyed by groupName
+    // Kamu sesuaikan ini dengan logic aslinya
+
+    // Misal kamu punya method untuk get vouchers by group:
+    $vouchers = Voucher::where('group_column', $groupName)->paginate(10);
+
+    // Render partial blade dengan $vouchers
+    return view('admin.vouchers._voucher_group_table', ['paginator' => $vouchers])->render();
+}
+
 }
