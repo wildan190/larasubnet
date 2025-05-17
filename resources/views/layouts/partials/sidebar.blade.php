@@ -1,4 +1,4 @@
-<div class="sidebar bg-dark text-white d-flex flex-column vh-100 p-3" style="width: 250px;">
+<div class="sidebar bg-dark text-white d-flex flex-column vh-100 p-3">
     <!-- Sidebar Header -->
     <h4 class="text-center mb-4">Admin Panel</h4>
 
@@ -16,22 +16,6 @@
        style="transition: background-color 0.3s;">
         <i class="fas fa-gift"></i> Vouchers
     </a>
-
-    <!-- Hover Script -->
-    <script>
-        document.querySelectorAll('.sidebar a').forEach(link => {
-            link.addEventListener('mouseover', () => {
-                if (!link.classList.contains('bg-primary')) {
-                    link.style.backgroundColor = '#0d6efd';
-                }
-            });
-            link.addEventListener('mouseout', () => {
-                if (!link.classList.contains('bg-primary')) {
-                    link.style.backgroundColor = '';
-                }
-            });
-        });
-    </script>
 
     <!-- Logout Button -->
     <form action="{{ route('logout') }}" method="POST" class="mt-auto">

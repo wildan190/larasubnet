@@ -13,15 +13,10 @@
     <style>
         /* Sidebar */
         .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 250px;
-            height: 100vh;
             background-color: #343a40;
             color: #fff;
+            height: 100vh;
             padding-top: 20px;
-            overflow-y: auto;
         }
 
         .sidebar ul {
@@ -48,17 +43,42 @@
 
         /* Main content & Navbar */
         .main-content {
-            margin-left: 250px;
             padding-top: 70px;
         }
 
         .navbar {
             position: fixed;
             top: 0;
-            left: 250px;
             right: 0;
+            left: 0;
             z-index: 1030;
-            width: calc(100% - 250px);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                position: fixed;
+                width: 250px;
+                overflow-y: auto;
+            }
+
+            .main-content {
+                margin-left: 250px;
+            }
+
+            .navbar {
+                left: 250px;
+                width: calc(100% - 250px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar ul li a {
+                font-size: 14px;
+                padding: 8px;
+            }
+            .navbar {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -66,16 +86,31 @@
 <body>
     <div class="d-flex">
         {{-- Sidebar --}}
-        @include('layouts.partials.sidebar')
+        <div class="sidebar d-md-block d-none">
+            @include('layouts.partials.sidebar')
+        </div>
+
+        {{-- Offcanvas Sidebar for mobile --}}
+        <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="mobileSidebarLabel">Menu</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-2">
+                @include('layouts.partials.sidebar')
+            </div>
+        </div>
 
         {{-- Main Content --}}
         <div class="main-content w-100">
             {{-- Navbar --}}
             <nav class="navbar navbar-expand-lg navbar-light bg-light rounded-bottom shadow-sm">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="#"></a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <button class="btn btn-primary btn-sm d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <a class="navbar-brand ms-2" href="#">@yield('title')</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
@@ -84,7 +119,7 @@
                             <li class="nav-item">
                                 <form action="{{ route('logout') }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn btn-danger">
+                                    <button type="submit" class="btn btn-danger btn-sm">
                                         Logout <i class="fa fa-sign-out-alt"></i>
                                     </button>
                                 </form>

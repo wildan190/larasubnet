@@ -4,29 +4,31 @@
 
 @section('content')
 <div class="container mt-5">
-    <h2>Dashboard Admin</h2>
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card text-white bg-success mb-3">
+    <h2 class="text-center text-md-start">Dashboard Admin</h2>
+
+    <!-- 🔹 Cards Section -->
+    <div class="row mt-4 g-3">
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            <div class="card text-white bg-success h-100">
                 <div class="card-header">Total Pendapatan</div>
-                <div class="card-body">
-                    <h5 class="card-title">Rp. {{ number_format($totalRevenue, 0, ',', '.') }}</h5>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title text-center">Rp. {{ number_format($totalRevenue, 0, ',', '.') }}</h5>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-primary mb-3">
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            <div class="card text-white bg-primary h-100">
                 <div class="card-header">Total Transaksi Settlement</div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ $totalTransactions }}</h5>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title text-center">{{ $totalTransactions }}</h5>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-warning mb-3">
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            <div class="card text-white bg-warning h-100">
                 <div class="card-header">Total Voucher Terjual</div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ $totalVouchers }}</h5>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title text-center">{{ $totalVouchers }}</h5>
                 </div>
             </div>
         </div>
@@ -38,7 +40,7 @@
             Grafik Pendapatan Bulanan
         </div>
         <div class="card-body">
-            <canvas id="revenueChart" width="100%" height="40"></canvas>
+            <canvas id="revenueChart" style="width: 100%; height: 300px;"></canvas>
         </div>
     </div>
 </div>
@@ -63,12 +65,14 @@
                 label: 'Pendapatan (Rp)',
                 data: data,
                 borderColor: '#4CAF50',
-                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                backgroundColor: 'rgba(76, 175, 80, 0.5)',
                 fill: true,
                 tension: 0.1,
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
@@ -90,20 +94,5 @@
             }
         }
     });
-
-    // Script untuk memastikan sidebar tetap di tempat saat scroll
-    window.onscroll = function() { fixSidebar() };
-
-    var sidebar = document.getElementById("sidebar");
-    var sticky = sidebar.offsetTop;
-
-    function fixSidebar() {
-        if (window.pageYOffset >= sticky) {
-            sidebar.classList.add("sticky");
-        } else {
-            sidebar.classList.remove("sticky");
-        }
-    }
 </script>
-
 @endsection
