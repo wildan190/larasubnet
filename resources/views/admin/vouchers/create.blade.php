@@ -32,7 +32,7 @@
 
         <!-- Input nama voucher utama jika pakai nama sama -->
         <div class="mb-3" id="mainNameInputContainer">
-            <label>Nama Voucher</label>
+            <label>Nama Produk</label>
             <input type="text" id="mainVoucherName" class="form-control" name="main_voucher_name" required>
         </div>
 
