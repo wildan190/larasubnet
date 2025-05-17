@@ -44,6 +44,7 @@
         /* Main content & Navbar */
         .main-content {
             padding-top: 70px;
+            min-height: 80vh; /* Forcing height to prevent footer overlap */
         }
 
         .navbar {
@@ -79,6 +80,17 @@
             .navbar {
                 font-size: 14px;
             }
+        }
+
+        /* Footer Styling */
+        footer {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            padding: 15px 0;
+            position: relative;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
         }
     </style>
 </head>
@@ -133,6 +145,13 @@
             <div class="container-fluid mt-4">
                 @yield('content')
             </div>
+
+            {{-- Footer --}}
+            <footer class="mt-4">
+                <div class="container">
+                    <p class="mb-0">&copy; {{ date('Y') }} Admin Panel. All rights reserved. | Developed by YourCompany</p>
+                </div>
+            </footer>
         </div>
     </div>
 
