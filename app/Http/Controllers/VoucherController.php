@@ -13,7 +13,7 @@ class VoucherController extends Controller
     public function index()
     {
         // Mengambil data voucher dengan pagination
-        $vouchers = Voucher::paginate(10); // 10 data per halaman
+        $vouchers = Voucher::paginate(20); // 10 data per halaman
 
         // Mengembalikan view dengan data vouchers dan pagination
         return view('admin.vouchers.index', compact('vouchers'));

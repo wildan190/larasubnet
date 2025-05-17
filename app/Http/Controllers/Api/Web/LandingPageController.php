@@ -208,7 +208,8 @@ class LandingPageController extends Controller
     {
         $voucher = Voucher::find($id);
 
-        if (!$voucher) {
+        // Jangan tampilkan jika voucher tidak ditemukan atau sudah terjual
+        if (!$voucher || $voucher->isSold) {
             return response()->json(['message' => 'Voucher not found'], 404);
         }
 

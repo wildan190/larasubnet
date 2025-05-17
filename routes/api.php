@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Web\GetVoucherSettlementController;
 use App\Http\Controllers\Api\Web\LandingPageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,3 +17,5 @@ Route::post('/create-order', [LandingPageController::class, 'createOrder']);
 Route::post('/midtrans-notification', [LandingPageController::class, 'handleNotification']);
 
 Route::get('/download-pdf/{orderNumber}', [LandingPageController::class, 'downloadPDF']);
+
+Route::get('/vouchers/settlement', GetVoucherSettlementController::class);
