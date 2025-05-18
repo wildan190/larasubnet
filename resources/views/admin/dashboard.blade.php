@@ -63,7 +63,7 @@
         </div>
         <div class="card-body">
             @if(count($unsoldVouchers) > 0)
-                <table class="table table-bordered">
+                <table id="voucherTable" class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Nama Voucher</th>
@@ -74,7 +74,12 @@
                         @foreach($unsoldVouchers as $voucher)
                             <tr>
                                 <td>{{ $voucher->name }}</td>
-                                <td>{{ $voucher->total }}</td>
+                                <td>
+                                    {{ $voucher->total }}
+                                    @if($voucher->total <= 5) <!-- Batas stok kritis -->
+                                        <span class="badge bg-danger ms-2">Stok Menipis!</span>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -88,15 +93,39 @@
     </div>
 </div>
 
+<!-- 🔹 Load jQuery dan DataTables dari CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
 <!-- 🔹 Load Chart.js dari CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- 🔹 Script untuk menampilkan Chart.js -->
+<!-- 🔹 Inisialisasi DataTables -->
 <script>
-    // Inisialisasi Chart.js
-    const ctx = document.getElementById('revenueChart')?.getContext('2d');
+    $(document).ready(function () {
+        $('#voucherTable').DataTable({
+            "pageLength": 5,   // Jumlah baris per halaman
+            "lengthChange": true, // Pilihan jumlah baris
+            "searching": true, // Fitur pencarian
+            "ordering": true, // Sorting kolom
+            "language": {
+                "lengthMenu": "Tampilkan _MENU_ data per halaman",
+                "zeroRecords": "Data tidak ditemukan",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                "infoEmpty": "Tidak ada data tersedia",
+                "infoFiltered": "(difilter dari total _MAX_ data)",
+                "search": "Cari:",
+                "paginate": {
+                    "next": "Berikutnya",
+                    "previous": "Sebelumnya"
+                }
+            }
+        });
+    });
 
-    // Parsing data bulanan ke format yang dibaca oleh Chart.js
+    // 🔹 Inisialisasi Chart.js
+    const ctx = document.getElementById('revenueChart')?.getContext('2d');
     const labels = @json($months->map(function($month) { return date('F Y', strtotime($month)); }) ?? []);
     const data = @json($totals ?? []);
 
