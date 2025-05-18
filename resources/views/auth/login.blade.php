@@ -26,8 +26,8 @@
         </div>
         <button type="submit" class="btn btn-primary w-100">Login</button>
     </form>
-    <div class="text-center mt-3">
+    {{-- <div class="text-center mt-3">
         <small>Belum punya akun? <a href="{{ route('register') }}">Daftar sekarang</a></small>
-    </div>
+    </div> --}}
 </div>
 @endsection
