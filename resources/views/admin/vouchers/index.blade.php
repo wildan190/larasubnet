@@ -66,7 +66,6 @@
         @endforeach
     </div>
 
-    {{-- Pagination grup frontend (accordion grup pagination) --}}
     <div id="groupPagination" class="d-flex justify-content-center mt-3"></div>
 </div>
 
@@ -83,15 +82,16 @@ $(document).ready(function () {
         var url = $(this).attr('href');
         if (!url) return;
 
+        // Paksa menggunakan HTTP daripada HTTPS
+        if (url.startsWith('https://')) {
+            url = url.replace('https://', 'http://');
+        }
+
         let params = new URLSearchParams(url.split('?')[1]);
-        // Cari param yang dimulai dengan 'page_'
         let pageParam = [...params.keys()].find(k => k.startsWith('page_'));
         if (!pageParam) return;
 
-        // Ambil groupHash dari pageParam
         let groupHash = pageParam.replace('page_', '');
-
-        // Target container sesuai groupHash
         var $targetGroup = $('#voucher-group-' + groupHash);
         if ($targetGroup.length === 0) $targetGroup = $('#voucherAccordion');
 
@@ -100,7 +100,6 @@ $(document).ready(function () {
             type: 'GET',
             dataType: 'html',
             success: function(data) {
-                // Ambil konten voucher-group sesuai id dari response
                 var newHtml = $(data).find('#' + $targetGroup.attr('id')).html();
                 $targetGroup.html(newHtml);
             },
@@ -122,16 +121,14 @@ $(document).ready(function () {
 
         if (totalPages <= 1) {
             $groups.show();
-            return; // Tidak perlu pagination kalau cuma 1 page
+            return;
         }
 
-        // Tampilkan grup sesuai halaman
         $groups.hide();
         const startIndex = (currentPage - 1) * maxGroupsPerPage;
         const endIndex = startIndex + maxGroupsPerPage;
         $groups.slice(startIndex, endIndex).show();
 
-        // Render tombol pagination grup
         for (let i = 1; i <= totalPages; i++) {
             const $btn = $('<button>')
                 .addClass('btn btn-sm me-1 ' + (i === currentPage ? 'btn-primary' : 'btn-outline-primary'))
@@ -142,17 +139,14 @@ $(document).ready(function () {
         }
     }
 
-    // Event klik pagination grup accordion
     $paginationContainer.on('click', 'button', function () {
         const page = parseInt($(this).attr('data-page'));
         if (page) {
             renderGroupPagination(page);
-            // Scroll ke atas accordion agar user lihat jelas grup pertama page baru
             $('html, body').animate({ scrollTop: $('#voucherAccordion').offset().top }, 300);
         }
     });
 
-    // Initial render grup pagination
     renderGroupPagination(1);
 });
 </script>
