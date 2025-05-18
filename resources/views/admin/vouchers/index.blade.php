@@ -75,16 +75,16 @@
 <script>
 $(document).ready(function () {
 
-    // Handle click pagination di tiap accordion group
+    // Handle klik pagination di tiap accordion group
     $('#voucherAccordion').on('click', '.pagination a', function(e) {
         e.preventDefault();
 
         var url = $(this).attr('href');
         if (!url) return;
 
-        // Paksa menggunakan HTTP daripada HTTPS
-        if (url.startsWith('https://')) {
-            url = url.replace('https://', 'http://');
+        // 🔄 Solusi Mixed Content: Hapus protokol agar relative ke halaman utama
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            url = url.replace(/^https?:/, '');
         }
 
         let params = new URLSearchParams(url.split('?')[1]);
@@ -96,7 +96,7 @@ $(document).ready(function () {
         if ($targetGroup.length === 0) $targetGroup = $('#voucherAccordion');
 
         $.ajax({
-            url: url,
+            url: url,          // URL relative tanpa http atau https
             type: 'GET',
             dataType: 'html',
             success: function(data) {
