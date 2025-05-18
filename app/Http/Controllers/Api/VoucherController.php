@@ -1,16 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Http\Controllers\Controller;
 
 class VoucherController extends Controller
 {
+    /**
+     * 📌 API: Menampilkan daftar voucher dengan filter dan paginasi per grup.
+     */
     public function index(Request $request)
     {
         $voucherName = $request->input('voucher_name');
@@ -37,50 +39,47 @@ class VoucherController extends Controller
 
         // Ambil semua hasil dulu, ordered by name
         $allVouchers = $query->orderBy('name')->get();
-
-        // Group hasil berdasarkan nama voucher
         $grouped = $allVouchers->groupBy('name');
 
         $voucherGroups = [];
 
         foreach ($grouped as $groupName => $vouchers) {
             $groupHash = md5($groupName);
-            $pageName = "page_{$groupHash}";
-
-            // Resolve current page untuk grup ini
-            $currentPage = LengthAwarePaginator::resolveCurrentPage($pageName);
+            $currentPage = LengthAwarePaginator::resolveCurrentPage($groupHash);
             $perPage = 5;
-
-            // Ambil slice data untuk current page
             $itemsForPage = $vouchers->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
-            // Buat paginator dengan pageName khusus (page_{groupHash})
             $paginator = new LengthAwarePaginator($itemsForPage, $vouchers->count(), $perPage, $currentPage, [
                 'path' => LengthAwarePaginator::resolveCurrentPath(),
-                'pageName' => $pageName,
-                'query' => $request->except($pageName), // agar query filter lain tetap dipertahankan
+                'pageName' => $groupHash,
             ]);
 
             $voucherGroups[$groupName] = [
                 'hash' => $groupHash,
-                'paginator' => $paginator,
+                'data' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'total' => $paginator->total()
+                ]
             ];
         }
 
-        return view('admin.vouchers.index', compact('voucherGroups'));
-    }
-    // Menampilkan form untuk membuat voucher baru
-    public function create()
-    {
-        return view('admin.vouchers.create');
+        return response()->json([
+            'message' => 'Data voucher berhasil diambil',
+            'voucherGroups' => $voucherGroups
+        ], 200);
     }
 
-    // Menyimpan voucher baru ke database
+    /**
+     * 📌 API: Menyimpan voucher baru ke database (Multiple)
+     */
     public function storeMultiple(Request $request)
     {
         $vouchersData = $request->input('vouchers');
+        $createdVouchers = [];
 
-        foreach ($vouchersData as $index => $voucherData) {
+        foreach ($vouchersData as $voucherData) {
             $validated = Validator::make($voucherData, [
                 'name' => 'required|string|max:255',
                 'voucher_code' => 'required|string|unique:vouchers,voucher_code|max:255',
@@ -90,30 +89,33 @@ class VoucherController extends Controller
                 'price' => 'required|numeric',
             ])->validate();
 
-            Voucher::create($validated);
+            $voucher = Voucher::create($validated);
+            $createdVouchers[] = $voucher;
         }
 
-        return redirect()->route('admin.vouchers.index')->with('success', 'Vouchers berhasil dibuat!');
+        return response()->json([
+            'message' => 'Vouchers berhasil dibuat!',
+            'vouchers' => $createdVouchers
+        ], 201);
     }
 
-    // Menampilkan detail voucher berdasarkan ID
+    /**
+     * 📌 API: Menampilkan detail voucher
+     */
     public function show($id)
     {
         $voucher = Voucher::findOrFail($id);
-        return view('admin.vouchers.show', compact('voucher'));
+        return response()->json([
+            'message' => 'Voucher ditemukan',
+            'voucher' => $voucher
+        ], 200);
     }
 
-    // Menampilkan form untuk mengedit voucher
-    public function edit($id)
-    {
-        $voucher = Voucher::findOrFail($id);
-        return view('admin.vouchers.edit', compact('voucher'));
-    }
-
-    // Menyimpan perubahan voucher yang sudah diedit
+    /**
+     * 📌 API: Memperbarui voucher berdasarkan ID
+     */
     public function update(Request $request, $id)
     {
-        // Validasi input dari form
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'voucher_code' => 'required|string|max:255|unique:vouchers,voucher_code,' . $id,
@@ -123,41 +125,39 @@ class VoucherController extends Controller
             'price' => 'required|numeric',
         ]);
 
-        // Menemukan voucher berdasarkan ID
         $voucher = Voucher::findOrFail($id);
-
-        // Memperbarui data voucher
         $voucher->update($validated);
 
-        // Redirect ke daftar voucher dengan pesan sukses
-        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher berhasil diperbarui!');
+        return response()->json([
+            'message' => 'Voucher berhasil diperbarui!',
+            'voucher' => $voucher
+        ], 200);
     }
 
-    // Menghapus voucher berdasarkan ID
+    /**
+     * 📌 API: Menghapus voucher berdasarkan ID
+     */
     public function destroy($id)
     {
-        // Menemukan voucher berdasarkan ID
         $voucher = Voucher::findOrFail($id);
-
-        // Menghapus voucher
         $voucher->delete();
 
-        // Redirect ke daftar voucher dengan pesan sukses
-        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher berhasil dihapus!');
+        return response()->json([
+            'message' => 'Voucher berhasil dihapus!'
+        ], 200);
     }
 
+    /**
+     * 📌 API: Mengambil data voucher berdasarkan grup tertentu
+     */
     public function groupData(Request $request)
     {
         $groupName = $request->query('group');
-
-        // Ambil voucher berdasar grup (misal berdasarkan size atau nama grup sesuai logika kamu)
-        // Contoh asumsi: $voucherGroups adalah koleksi keyed by groupName
-        // Kamu sesuaikan ini dengan logic aslinya
-
-        // Misal kamu punya method untuk get vouchers by group:
         $vouchers = Voucher::where('group_column', $groupName)->paginate(10);
 
-        // Render partial blade dengan $vouchers
-        return view('admin.vouchers._voucher_group_table', ['paginator' => $vouchers])->render();
+        return response()->json([
+            'message' => 'Data voucher berdasarkan grup berhasil diambil',
+            'vouchers' => $vouchers
+        ], 200);
     }
 }
