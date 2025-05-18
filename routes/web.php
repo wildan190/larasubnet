@@ -3,6 +3,7 @@
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,4 +30,9 @@ Route::middleware(['auth'])->group(function () {
     ->name('admin.vouchers.groupData');
 
     // Anda bisa menambahkan rute lainnya di dalam grup ini jika diperlukan
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/profile/edit', [UserController::class, 'edit'])->name('profile.edit');
+    Route::post('/admin/profile/update', [UserController::class, 'update'])->name('profile.update');
 });

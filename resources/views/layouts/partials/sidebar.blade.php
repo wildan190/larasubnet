@@ -17,6 +17,14 @@
         <i class="fas fa-gift"></i> Vouchers
     </a>
 
+    {{-- profiles --}}
+    <a href="{{ route('profile.edit') }}" 
+       class="text-white text-decoration-none mb-3 py-2 px-3 rounded-3 
+              {{ request()->is('admin/profiles*') ? 'bg-primary' : '' }}"
+       style="transition: background-color 0.3s;">
+        <i class="fas fa-user"></i> Profile
+    </a>
+
     <!-- Logout Button -->
     <form action="{{ route('logout') }}" method="POST" class="mt-auto">
         @csrf
