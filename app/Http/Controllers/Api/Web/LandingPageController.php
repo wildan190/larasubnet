@@ -86,7 +86,7 @@ class LandingPageController extends Controller
             ],
         ];
 
-        if ($voucher->price >= 10000 && $voucher->price <= 29000) {
+        if ($voucher->price >= 1000 && $voucher->price <= 29000) {
             $midtransTransaction['enabled_payments'] = ['gopay', 'shopeepay', 'dana'];
         }
 
