@@ -70,8 +70,8 @@ class LandingPageController extends Controller
             'order_date' => Carbon::now(),
             'total_price' => $voucher->price,
             'status' => 'pending',
-            'customer_name' => $request->name,
-            'customer_email' => $request->email,
+            'customer_name' => $request->name, // ⬅️ Nama pelanggan disimpan
+            'customer_email' => $request->email, // ⬅️ Email pelanggan disimpan
         ]);
 
         // ✅ Buat transaksi baru
@@ -91,11 +91,6 @@ class LandingPageController extends Controller
                 'email' => $request->email,
             ],
         ];
-
-        // ✅ Jika harga voucher 10.000, hanya aktifkan metode pembayaran GoPay
-        if ($voucher->price == 10000) {
-            $midtransTransaction['enabled_payments'] = ['gopay'];
-        }
 
         // ✅ Generate Snap Token dari Midtrans
         $snapToken = Snap::getSnapToken($midtransTransaction);
