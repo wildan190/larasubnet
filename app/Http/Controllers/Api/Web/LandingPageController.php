@@ -99,12 +99,10 @@ class LandingPageController extends Controller
         ]);
     }
 
-    // 🔹 2️⃣ Handle Midtrans Notification
     public function handleNotification(Request $request)
     {
         $notif = $request->all();
 
-        // ✅ Verifikasi Signature Key
         $orderId = $notif['order_id'];
         $statusCode = $notif['status_code'];
         $grossAmount = $notif['gross_amount'];
@@ -117,7 +115,6 @@ class LandingPageController extends Controller
             return response()->json(['message' => 'Invalid Signature'], 403);
         }
 
-        // ✅ Ambil data order berdasarkan order_number
         $order = Order::where('order_number', $orderId)->first();
 
         if (!$order) {
@@ -127,7 +124,6 @@ class LandingPageController extends Controller
         $transactionStatus = $notif['transaction_status'];
         $transactionId = $notif['transaction_id'];
 
-        // ✅ Update status order dan voucher
         if ($transactionStatus == 'settlement') {
             $voucher = $order->voucher;
             $voucher->isSold = true;
@@ -136,7 +132,6 @@ class LandingPageController extends Controller
             $order->status = 'settlement';
             $order->save();
 
-            // ✅ Catat log transaksi
             TransactionLog::create([
                 'order_id' => $order->id,
                 'transaction_status' => $transactionStatus,
@@ -145,34 +140,28 @@ class LandingPageController extends Controller
                 'notification' => json_encode($notif),
             ]);
 
-            // 🔹 Ambil data customer
             $customer_name = $order->customer_name;
             $customer_email = $order->customer_email;
 
-            // 🔹 Ambil data voucher (termasuk voucher_code)
-            $voucher = $order->voucher; // Eloquent Relationship
+            $voucher = $order->voucher;
 
-            // 🔹 Render PDF dengan data voucher lengkap
             $pdf = PDF::loadView('pdf.voucher', [
                 'order' => $order,
                 'customer_name' => $customer_name,
                 'customer_email' => $customer_email,
-                'voucher_code' => $voucher->voucher_code, // ✅ Ditambahkan voucher_code
+                'voucher_code' => $voucher->voucher_code,
                 'voucher_name' => $voucher->name,
                 'duration' => $voucher->duration,
                 'price' => $voucher->price,
             ]);
 
-            // ✅ Pastikan folder vouchers ada
             if (!Storage::disk('public')->exists('vouchers')) {
                 Storage::disk('public')->makeDirectory('vouchers');
             }
 
-            // ✅ Simpan PDF di storage
             $fileName = 'Voucher_' . $order->order_number . '.pdf';
             Storage::disk('public')->put('vouchers/' . $fileName, $pdf->output());
 
-            // ✅ Kirim link download
             $downloadUrl = url('/api/download-pdf/' . $order->order_number);
 
             return response()->json([
@@ -205,12 +194,10 @@ class LandingPageController extends Controller
     {
         $voucher = Voucher::find($id);
 
-        // Jangan tampilkan jika voucher tidak ditemukan atau sudah terjual
         if (!$voucher || $voucher->isSold) {
             return response()->json(['message' => 'Voucher not found'], 404);
         }
 
-        // Sembunyikan voucher_code saat mengambil data voucher
         $voucherData = $voucher->toArray();
         unset($voucherData['voucher_code']);
 
