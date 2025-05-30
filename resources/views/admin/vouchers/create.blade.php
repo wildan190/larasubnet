@@ -33,7 +33,7 @@
         <!-- Input nama voucher utama jika pakai nama sama -->
         <div class="mb-3" id="mainNameInputContainer">
             <label>Nama Produk</label>
-            <input type="text" id="mainVoucherName" class="form-control" name="main_voucher_name" required>
+            <input type="text" id="mainVoucherName" class="form-control" name="main_voucher_name" placeholder="Dilarang ada spasi" required>
         </div>
 
         <div id="voucher-forms-container">

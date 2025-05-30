@@ -23,7 +23,7 @@ class LandingPageController extends Controller
         // Konfigurasi Midtrans
         Config::$serverKey = config('midtrans.server_key');
         Config::$clientKey = config('midtrans.client_key');
-        Config::$isProduction = false; // Ubah ke true jika di production
+        Config::$isProduction = true; // Ubah ke true jika di production
         Config::$isSanitized = true;
         Config::$is3ds = true;
     }
