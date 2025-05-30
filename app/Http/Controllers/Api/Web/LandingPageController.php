@@ -46,24 +46,20 @@ class LandingPageController extends Controller
         ]);
     }
 
-    // Create an order
     public function createOrder(Request $request)
     {
-        // ✅ Validasi input
         $request->validate([
             'voucher_id' => 'required|exists:vouchers,id',
             'name' => 'required|string',
             'email' => 'required|email',
         ]);
 
-        // ✅ Ambil data voucher
         $voucher = Voucher::find($request->voucher_id);
 
         if (!$voucher) {
             return response()->json(['message' => 'Voucher not found'], 404);
         }
 
-        // ✅ Buat order baru dengan customer name & email
         $order = Order::create([
             'voucher_id' => $voucher->id,
             'order_number' => strtoupper(uniqid('ORD-', true)),
@@ -74,13 +70,11 @@ class LandingPageController extends Controller
             'customer_email' => $request->email,
         ]);
 
-        // ✅ Buat transaksi baru
         $transaction = Transaction::create([
             'order_id' => $order->id,
             'transaction_number' => strtoupper(uniqid('TXN-', true)),
         ]);
 
-        // ✅ Siapkan data untuk Midtrans
         $midtransTransaction = [
             'transaction_details' => [
                 'order_id' => $order->order_number,
@@ -92,12 +86,10 @@ class LandingPageController extends Controller
             ],
         ];
 
-        // ✅ Jika harga voucher 10.000, hanya aktifkan metode pembayaran GoPay
-        if ($voucher->price == 10000) {
-            $midtransTransaction['enabled_payments'] = ['gopay'];
+        if ($voucher->price >= 10000 && $voucher->price <= 29000) {
+            $midtransTransaction['enabled_payments'] = ['gopay', 'shopeepay', 'dana'];
         }
 
-        // ✅ Generate Snap Token dari Midtrans
         $snapToken = Snap::getSnapToken($midtransTransaction);
 
         return response()->json([
