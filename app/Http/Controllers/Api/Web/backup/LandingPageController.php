@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Web;
+namespace App\Http\Controllers\Api\Web\Backup;
 
 use App\Http\Controllers\Controller;
 use App\Models\Voucher;
