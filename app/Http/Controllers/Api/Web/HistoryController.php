@@ -16,12 +16,10 @@ class HistoryController extends Controller
     {
         $query = Order::query();
 
-        // Ambil input dari request
         $customerName = $request->input('customer_name');
         $customerEmail = $request->input('customer_email');
         $orderNumber = $request->input('order_number');
 
-        // Tambahkan kondisi pencarian berdasarkan input yang tersedia
         if ($customerName) {
             $query->where('customer_name', 'LIKE', "%{$customerName}%");
         }
@@ -34,19 +32,23 @@ class HistoryController extends Controller
             $query->where('order_number', 'LIKE', "%{$orderNumber}%");
         }
 
-        // Jika tidak ada input sama sekali, kembalikan respons error
         if (!$customerName && !$customerEmail && !$orderNumber) {
-            return response()->json([
-                'message' => 'Harap isi minimal satu dari: customer_name, customer_email, atau order_number.'
-            ], 422);
+            return response()->json(
+                [
+                    'message' => 'Harap isi minimal satu dari: customer_name, customer_email, atau order_number.',
+                ],
+                422,
+            );
         }
 
-        // Ambil hasil dengan relasi voucher & transaction
+        // Tambahkan filter status settlement
+        $query->where('status', 'settlement');
+
         $orders = $query->with(['voucher', 'transaction'])->get();
 
         return response()->json([
             'message' => 'Riwayat pesanan berhasil diambil.',
-            'data' => $orders
+            'data' => $orders,
         ]);
     }
 }
