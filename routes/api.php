@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VoucherController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Api\Web\GetVoucherSettlementController;
+use App\Http\Controllers\Api\Web\HistoryController;
 use App\Http\Controllers\Api\Web\LandingPageController;
 use App\Http\Controllers\Auth\Api\AuthController;
 use Illuminate\Http\Request;
@@ -49,3 +50,5 @@ Route::post('/midtrans-notification', [LandingPageController::class, 'handleNoti
 Route::get('/download-pdf/{orderNumber}', [LandingPageController::class, 'downloadPDF']);
 
 Route::get('/vouchers/settlement', GetVoucherSettlementController::class);
+
+Route::get('/web/history', [HistoryController::class, 'index']);
