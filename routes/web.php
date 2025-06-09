@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/vouchers/{id}', [VoucherController::class, 'destroy'])->name('admin.vouchers.destroy');
 
     Route::get('admin/vouchers/group-data', [VoucherController::class, 'groupData'])
-    ->name('admin.vouchers.groupData');
+        ->name('admin.vouchers.groupData');
 
     // Anda bisa menambahkan rute lainnya di dalam grup ini jika diperlukan
 });

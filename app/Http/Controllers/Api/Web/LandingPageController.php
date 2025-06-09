@@ -3,18 +3,17 @@
 namespace App\Http\Controllers\Api\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Voucher;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Transaction;
 use App\Models\TransactionLog;
+use App\Models\Voucher;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Midtrans\Config;
 use Midtrans\Snap;
-use Midtrans\Transaction as MidtransTransaction;
-use Carbon\Carbon;
 use PDF;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Response;
 
 class LandingPageController extends Controller
 {
@@ -49,36 +48,46 @@ class LandingPageController extends Controller
     public function createOrder(Request $request)
     {
         $request->validate([
-            'voucher_id' => 'required|exists:vouchers,id',
+            'voucher_ids' => 'required|array|min:1',
+            'voucher_ids.*' => 'exists:vouchers,id',
             'name' => 'required|string',
             'email' => 'required|email',
         ]);
 
-        $voucher = Voucher::find($request->voucher_id);
+        $vouchers = Voucher::whereIn('id', $request->voucher_ids)->get();
 
-        if (!$voucher) {
-            return response()->json(['message' => 'Voucher not found'], 404);
+        if ($vouchers->isEmpty()) {
+            return response()->json(['message' => 'No vouchers found'], 404);
         }
 
+        $totalPrice = $vouchers->sum('price');
+
         $order = Order::create([
-            'voucher_id' => $voucher->id,
             'order_number' => strtoupper(uniqid('ORD-', true)),
             'order_date' => Carbon::now(),
-            'total_price' => $voucher->price,
+            'total_price' => $totalPrice,
             'status' => 'pending',
             'customer_name' => $request->name,
             'customer_email' => $request->email,
         ]);
 
-        $transaction = Transaction::create([
+        foreach ($vouchers as $voucher) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'voucher_id' => $voucher->id,
+                'price' => $voucher->price,
+            ]);
+        }
+
+        Transaction::create([
             'order_id' => $order->id,
             'transaction_number' => strtoupper(uniqid('TXN-', true)),
         ]);
 
-        $midtransTransaction = [
+        $snapTransaction = [
             'transaction_details' => [
                 'order_id' => $order->order_number,
-                'gross_amount' => $voucher->price,
+                'gross_amount' => $totalPrice,
             ],
             'customer_details' => [
                 'first_name' => $request->name,
@@ -86,11 +95,11 @@ class LandingPageController extends Controller
             ],
         ];
 
-        if ($voucher->price >= 1 && $voucher->price <= 29000) {
-            $midtransTransaction['enabled_payments'] = ['gopay', 'shopeepay', 'dana'];
+        if ($totalPrice >= 1 && $totalPrice <= 29000) {
+            $snapTransaction['enabled_payments'] = ['gopay', 'shopeepay', 'dana'];
         }
 
-        $snapToken = Snap::getSnapToken($midtransTransaction);
+        $snapToken = Snap::getSnapToken($snapTransaction);
 
         return response()->json([
             'success' => true,
@@ -109,7 +118,7 @@ class LandingPageController extends Controller
         $serverKey = config('midtrans.server_key');
 
         $inputSignature = $notif['signature_key'];
-        $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $expectedSignature = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         if ($inputSignature !== $expectedSignature) {
             return response()->json(['message' => 'Invalid Signature'], 403);
@@ -117,7 +126,7 @@ class LandingPageController extends Controller
 
         $order = Order::where('order_number', $orderId)->first();
 
-        if (!$order) {
+        if (! $order) {
             return response()->json(['message' => 'Order not found'], 404);
         }
 
@@ -125,9 +134,12 @@ class LandingPageController extends Controller
         $transactionId = $notif['transaction_id'];
 
         if ($transactionStatus == 'settlement') {
-            $voucher = $order->voucher;
-            $voucher->isSold = true;
-            $voucher->save();
+            // Tandai semua voucher dalam order sebagai sold
+            foreach ($order->orderItems as $item) {
+                $voucher = $item->voucher;
+                $voucher->isSold = true;
+                $voucher->save();
+            }
 
             $order->status = 'settlement';
             $order->save();
@@ -140,29 +152,22 @@ class LandingPageController extends Controller
                 'notification' => json_encode($notif),
             ]);
 
-            $customer_name = $order->customer_name;
-            $customer_email = $order->customer_email;
-
-            $voucher = $order->voucher;
-
-            $pdf = PDF::loadView('pdf.voucher', [
+            // Buat PDF isi semua voucher
+            $pdf = PDF::loadView('pdf.voucher-multiple', [
                 'order' => $order,
-                'customer_name' => $customer_name,
-                'customer_email' => $customer_email,
-                'voucher_code' => $voucher->voucher_code,
-                'voucher_name' => $voucher->name,
-                'duration' => $voucher->duration,
-                'price' => $voucher->price,
+                'customer_name' => $order->customer_name,
+                'customer_email' => $order->customer_email,
+                'orderItems' => $order->orderItems,
             ]);
 
-            if (!Storage::disk('public')->exists('vouchers')) {
+            if (! Storage::disk('public')->exists('vouchers')) {
                 Storage::disk('public')->makeDirectory('vouchers');
             }
 
-            $fileName = 'Voucher_' . $order->order_number . '.pdf';
-            Storage::disk('public')->put('vouchers/' . $fileName, $pdf->output());
+            $fileName = 'Voucher_'.$order->order_number.'.pdf';
+            Storage::disk('public')->put('vouchers/'.$fileName, $pdf->output());
 
-            $downloadUrl = url('/api/download-pdf/' . $order->order_number);
+            $downloadUrl = url('/api/download-pdf/'.$order->order_number);
 
             return response()->json([
                 'message' => 'Notification received',
@@ -181,10 +186,10 @@ class LandingPageController extends Controller
 
     public function downloadPDF($orderNumber)
     {
-        $filePath = 'vouchers/Voucher_' . $orderNumber . '.pdf';
+        $filePath = 'vouchers/Voucher_'.$orderNumber.'.pdf';
 
         if (Storage::disk('public')->exists($filePath)) {
-            return response()->download(storage_path('app/public/' . $filePath));
+            return response()->download(storage_path('app/public/'.$filePath));
         } else {
             return response()->json(['message' => 'File not found'], 404);
         }
@@ -194,7 +199,7 @@ class LandingPageController extends Controller
     {
         $voucher = Voucher::find($id);
 
-        if (!$voucher || $voucher->isSold) {
+        if (! $voucher || $voucher->isSold) {
             return response()->json(['message' => 'Voucher not found'], 404);
         }
 

@@ -9,18 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up()
-{
-    Schema::create('transaction_logs', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('order_id')->constrained()->onDelete('cascade');
-        $table->string('transaction_status');
-        $table->string('action');
-        $table->json('notification');
-        $table->timestamps();
-    });
-}
-
+    public function up()
+    {
+        Schema::create('transaction_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->string('transaction_status');
+            $table->string('action');
+            $table->json('notification');
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Validator;
 
 class VoucherController extends Controller
 {
@@ -22,16 +20,16 @@ class VoucherController extends Controller
         $query = Voucher::query()->where('isSold', false);
 
         // Filter dinamis jika parameter ada
-        if (!empty($voucherName)) {
-            $query->where('name', 'like', '%' . $voucherName . '%');
+        if (! empty($voucherName)) {
+            $query->where('name', 'like', '%'.$voucherName.'%');
         }
-        if (!empty($size)) {
+        if (! empty($size)) {
             $query->where('size', $size);
         }
-        if (!empty($duration)) {
+        if (! empty($duration)) {
             $query->where('duration', $duration);
         }
-        if (!empty($price)) {
+        if (! empty($price)) {
             $query->where('price', '<=', $price);
         }
 
@@ -69,6 +67,7 @@ class VoucherController extends Controller
 
         return view('admin.vouchers.index', compact('voucherGroups'));
     }
+
     // Menampilkan form untuk membuat voucher baru
     public function create()
     {
@@ -100,6 +99,7 @@ class VoucherController extends Controller
     public function show($id)
     {
         $voucher = Voucher::findOrFail($id);
+
         return view('admin.vouchers.show', compact('voucher'));
     }
 
@@ -107,6 +107,7 @@ class VoucherController extends Controller
     public function edit($id)
     {
         $voucher = Voucher::findOrFail($id);
+
         return view('admin.vouchers.edit', compact('voucher'));
     }
 
@@ -116,7 +117,7 @@ class VoucherController extends Controller
         // Validasi input dari form
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'voucher_code' => 'required|string|max:255|unique:vouchers,voucher_code,' . $id,
+            'voucher_code' => 'required|string|max:255|unique:vouchers,voucher_code,'.$id,
             'description' => 'nullable|string',
             'size' => 'required|string|max:255',
             'duration' => 'required|integer',

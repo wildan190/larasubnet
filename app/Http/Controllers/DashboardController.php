@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Voucher;  // jangan lupa import Voucher model
-use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {

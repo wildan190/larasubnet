@@ -11,7 +11,6 @@ class GetVoucherSettlementController extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(Request $request)
@@ -25,16 +24,16 @@ class GetVoucherSettlementController extends Controller
             ->with(['orders:id,voucher_id,customer_name,customer_email'])
             ->first(['id', 'name', 'voucher_code', 'price']);
 
-        if (!$voucher) {
+        if (! $voucher) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Voucher not found or not settled.'
+                'message' => 'Voucher not found or not settled.',
             ], 404);
         }
 
         return response()->json([
             'status' => 'success',
-            'data' => $voucher
+            'data' => $voucher,
         ], 200);
     }
 }

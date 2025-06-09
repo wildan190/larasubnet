@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class VoucherController extends Controller
 {
@@ -24,16 +24,16 @@ class VoucherController extends Controller
         $query = Voucher::query()->where('isSold', false);
 
         // Filter dinamis jika parameter ada
-        if (!empty($voucherName)) {
-            $query->where('name', 'like', '%' . $voucherName . '%');
+        if (! empty($voucherName)) {
+            $query->where('name', 'like', '%'.$voucherName.'%');
         }
-        if (!empty($size)) {
+        if (! empty($size)) {
             $query->where('size', $size);
         }
-        if (!empty($duration)) {
+        if (! empty($duration)) {
             $query->where('duration', $duration);
         }
-        if (!empty($price)) {
+        if (! empty($price)) {
             $query->where('price', '<=', $price);
         }
 
@@ -60,14 +60,14 @@ class VoucherController extends Controller
                 'pagination' => [
                     'current_page' => $paginator->currentPage(),
                     'last_page' => $paginator->lastPage(),
-                    'total' => $paginator->total()
-                ]
+                    'total' => $paginator->total(),
+                ],
             ];
         }
 
         return response()->json([
             'message' => 'Data voucher berhasil diambil',
-            'voucherGroups' => $voucherGroups
+            'voucherGroups' => $voucherGroups,
         ], 200);
     }
 
@@ -95,7 +95,7 @@ class VoucherController extends Controller
 
         return response()->json([
             'message' => 'Vouchers berhasil dibuat!',
-            'vouchers' => $createdVouchers
+            'vouchers' => $createdVouchers,
         ], 201);
     }
 
@@ -105,9 +105,10 @@ class VoucherController extends Controller
     public function show($id)
     {
         $voucher = Voucher::findOrFail($id);
+
         return response()->json([
             'message' => 'Voucher ditemukan',
-            'voucher' => $voucher
+            'voucher' => $voucher,
         ], 200);
     }
 
@@ -118,7 +119,7 @@ class VoucherController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'voucher_code' => 'required|string|max:255|unique:vouchers,voucher_code,' . $id,
+            'voucher_code' => 'required|string|max:255|unique:vouchers,voucher_code,'.$id,
             'description' => 'nullable|string',
             'size' => 'required|string|max:255',
             'duration' => 'required|integer',
@@ -130,7 +131,7 @@ class VoucherController extends Controller
 
         return response()->json([
             'message' => 'Voucher berhasil diperbarui!',
-            'voucher' => $voucher
+            'voucher' => $voucher,
         ], 200);
     }
 
@@ -143,7 +144,7 @@ class VoucherController extends Controller
         $voucher->delete();
 
         return response()->json([
-            'message' => 'Voucher berhasil dihapus!'
+            'message' => 'Voucher berhasil dihapus!',
         ], 200);
     }
 
@@ -157,7 +158,7 @@ class VoucherController extends Controller
 
         return response()->json([
             'message' => 'Data voucher berdasarkan grup berhasil diambil',
-            'vouchers' => $vouchers
+            'vouchers' => $vouchers,
         ], 200);
     }
 }

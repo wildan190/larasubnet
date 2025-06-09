@@ -9,16 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up()
-{
-    Schema::create('transactions', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('order_id')->constrained()->onDelete('cascade');
-        $table->string('transaction_number')->unique();
-        $table->timestamps();
-    });
-}
-
+    public function up()
+    {
+        Schema::create('transactions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->string('transaction_number')->unique();
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

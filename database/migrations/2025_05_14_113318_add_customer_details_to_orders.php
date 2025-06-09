@@ -9,19 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up()
-{
-    Schema::table('orders', function (Blueprint $table) {
-        $table->string('customer_name')->nullable();
-        $table->string('customer_email')->nullable();
-    });
-}
+    public function up()
+    {
+        Schema::table('orders', function (Blueprint $table) {
+            $table->string('customer_name')->nullable();
+            $table->string('customer_email')->nullable();
+        });
+    }
 
-public function down()
-{
-    Schema::table('orders', function (Blueprint $table) {
-        $table->dropColumn(['customer_name', 'customer_email']);
-    });
-}
-
+    public function down()
+    {
+        Schema::table('orders', function (Blueprint $table) {
+            $table->dropColumn(['customer_name', 'customer_email']);
+        });
+    }
 };

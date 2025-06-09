@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Controller;
 
 class UserController extends Controller
 {
@@ -18,7 +17,7 @@ class UserController extends Controller
     {
         $user = $request->user(); // ambil user dari token/session API
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
@@ -35,13 +34,13 @@ class UserController extends Controller
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
         ]);
 

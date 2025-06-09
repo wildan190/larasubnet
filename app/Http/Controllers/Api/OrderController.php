@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -17,15 +17,15 @@ class OrderController extends Controller
 
         // Apply filters if present
         if ($request->has('order_number')) {
-            $query->where('order_number', 'like', '%' . $request->order_number . '%');
+            $query->where('order_number', 'like', '%'.$request->order_number.'%');
         }
 
         if ($request->has('customer_email')) {
-            $query->where('customer_email', 'like', '%' . $request->customer_email . '%');
+            $query->where('customer_email', 'like', '%'.$request->customer_email.'%');
         }
 
         if ($request->has('customer_name')) {
-            $query->where('customer_name', 'like', '%' . $request->customer_name . '%');
+            $query->where('customer_name', 'like', '%'.$request->customer_name.'%');
         }
 
         if ($request->has('status')) {

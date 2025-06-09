@@ -4,12 +4,10 @@ use App\Http\Controllers\Api\DashboardController as ApiDashboardController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VoucherController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Api\Web\GetVoucherSettlementController;
 use App\Http\Controllers\Api\Web\HistoryController;
 use App\Http\Controllers\Api\Web\LandingPageController;
 use App\Http\Controllers\Auth\Api\AuthController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);

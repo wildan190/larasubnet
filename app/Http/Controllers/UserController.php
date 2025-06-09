@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -16,9 +15,10 @@ class UserController extends Controller
         $user = Auth::user();
 
         // Ensure $user is an instance of App\Models\User
-        if (!($user instanceof \App\Models\User)) {
+        if (! ($user instanceof \App\Models\User)) {
             $user = \App\Models\User::find(Auth::id());
         }
+
         return view('admin.profiles.edit', compact('user'));
     }
 
@@ -28,14 +28,14 @@ class UserController extends Controller
         $user = Auth::user();
 
         // Ensure $user is an instance of App\Models\User
-        if (!($user instanceof \App\Models\User)) {
+        if (! ($user instanceof \App\Models\User)) {
             $user = \App\Models\User::find(Auth::id());
         }
 
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
         ]);
 

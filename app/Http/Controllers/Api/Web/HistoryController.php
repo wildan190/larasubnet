@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Web;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
+use Illuminate\Http\Request;
 
 class HistoryController extends Controller
 {
@@ -32,7 +32,7 @@ class HistoryController extends Controller
             $query->where('order_number', 'LIKE', "%{$orderNumber}%");
         }
 
-        if (!$customerName && !$customerEmail && !$orderNumber) {
+        if (! $customerName && ! $customerEmail && ! $orderNumber) {
             return response()->json(
                 [
                     'message' => 'Harap isi minimal satu dari: customer_name, customer_email, atau order_number.',

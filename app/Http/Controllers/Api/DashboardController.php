@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Voucher;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {

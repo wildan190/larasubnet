@@ -9,19 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up()
-{
-    Schema::create('orders', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('voucher_id')->constrained()->onDelete('cascade');
-        $table->string('order_number')->unique();
-        $table->timestamp('order_date');
-        $table->decimal('total_price', 10, 2);
-        $table->enum('status', ['pending', 'settlement', 'cancelled'])->default('pending');
-        $table->timestamps();
-    });
-}
-
+    public function up()
+    {
+        Schema::create('orders', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('voucher_id')->constrained()->onDelete('cascade');
+            $table->string('order_number')->unique();
+            $table->timestamp('order_date');
+            $table->decimal('total_price', 10, 2);
+            $table->enum('status', ['pending', 'settlement', 'cancelled'])->default('pending');
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.
