@@ -184,15 +184,22 @@ class LandingPageController extends Controller
         return response()->json(['message' => 'Notification received']);
     }
 
-    public function downloadPDF($orderNumber)
+    public function downloadPDF($order_number)
     {
-        $filePath = 'vouchers/Voucher_'.$orderNumber.'.pdf';
+        $order = Order::with(['orderItems.voucher'])->where('order_number', $order_number)->first();
 
-        if (Storage::disk('public')->exists($filePath)) {
-            return response()->download(storage_path('app/public/'.$filePath));
-        } else {
-            return response()->json(['message' => 'File not found'], 404);
+        if (! $order) {
+            return response()->json(['message' => 'Order tidak ditemukan.'], 404);
         }
+
+        // Generate PDF
+        $pdf = PDF::loadView('pdf.voucher-multiple', ['order' => $order]);
+
+        $fileName = 'Voucher_' . $order->order_number . '.pdf';
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, $fileName);
     }
 
     public function getVoucher($id)
