@@ -20,12 +20,13 @@ class DashboardController extends Controller
 
         // Jumlah voucher unik yang digunakan dalam transaksi berhasil
         $totalVouchers = Order::where('status', 'settlement')
-            ->whereNotNull('voucher_id')
-            ->distinct('voucher_id')
-            ->count('voucher_id');
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->distinct('order_items.voucher_id')
+            ->count('order_items.voucher_id');
 
         // Pendapatan bulanan
-        $monthlyRevenue = Order::selectRaw("SUM(total_price) as total, DATE_FORMAT(order_date, '%Y-%m') as month")
+        // --- BAGIAN INI YANG AKAN DIUPDATE UNTUK MEMPERBAIKI ERROR PostgreSQL ---
+        $monthlyRevenue = Order::selectRaw("SUM(total_price) as total, TO_CHAR(order_date, 'YYYY-MM') as month")
             ->where('status', 'settlement')
             ->groupBy('month')
             ->orderBy('month')
