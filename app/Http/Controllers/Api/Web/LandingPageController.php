@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Midtrans\Config;
 use Midtrans\Snap;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LandingPageController extends Controller
 {
@@ -193,7 +193,7 @@ class LandingPageController extends Controller
         }
 
         // Generate PDF
-        $pdf = PDF::loadView('pdf.voucher-multiple', ['order' => $order]);
+        $pdf = Pdf::loadView('pdf.voucher-multiple', ['order' => $order]);
 
         $fileName = 'Voucher_'.$order->order_number.'.pdf';
 
