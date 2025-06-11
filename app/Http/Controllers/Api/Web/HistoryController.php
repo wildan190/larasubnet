@@ -8,10 +8,6 @@ use Illuminate\Http\Request;
 
 class HistoryController extends Controller
 {
-    /**
-     * Handle request to get order history based on customer_name,
-     * customer_email, or order_number. One or more fields may be provided.
-     */
     public function index(Request $request)
     {
         $query = Order::query();
@@ -32,7 +28,7 @@ class HistoryController extends Controller
             $query->where('order_number', 'LIKE', "%{$orderNumber}%");
         }
 
-        if (!$customerName && !$customerEmail && !$orderNumber) {
+        if (! $customerName && ! $customerEmail && ! $orderNumber) {
             return response()->json(
                 [
                     'message' => 'Harap isi minimal satu dari: customer_name, customer_email, atau order_number.',
@@ -41,10 +37,8 @@ class HistoryController extends Controller
             );
         }
 
-        // Ambil hanya pesanan yang berhasil (settlement)
         $query->where('status', 'settlement');
 
-        // Load relasi orderItems dan voucher
         $orders = $query->with(['orderItems.voucher', 'transaction'])->get();
 
         return response()->json([

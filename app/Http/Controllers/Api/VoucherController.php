@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Validator;
 
 class VoucherController extends Controller
 {
-    /**
-     * 📌 API: Menampilkan daftar voucher dengan filter dan paginasi per grup.
-     */
     public function index(Request $request)
     {
         $voucherName = $request->input('voucher_name');
@@ -20,10 +17,8 @@ class VoucherController extends Controller
         $duration = $request->input('duration');
         $price = $request->input('price');
 
-        // Mulai query, ambil voucher yang belum terjual
         $query = Voucher::query()->where('isSold', false);
 
-        // Filter dinamis jika parameter ada
         if (! empty($voucherName)) {
             $query->where('name', 'like', '%'.$voucherName.'%');
         }
@@ -37,7 +32,6 @@ class VoucherController extends Controller
             $query->where('price', '<=', $price);
         }
 
-        // Ambil semua hasil dulu, ordered by name
         $allVouchers = $query->orderBy('name')->get();
         $grouped = $allVouchers->groupBy('name');
 
@@ -71,9 +65,6 @@ class VoucherController extends Controller
         ], 200);
     }
 
-    /**
-     * 📌 API: Menyimpan voucher baru ke database (Multiple)
-     */
     public function storeMultiple(Request $request)
     {
         $vouchersData = $request->input('vouchers');
@@ -99,9 +90,6 @@ class VoucherController extends Controller
         ], 201);
     }
 
-    /**
-     * 📌 API: Menampilkan detail voucher
-     */
     public function show($id)
     {
         $voucher = Voucher::findOrFail($id);
@@ -112,9 +100,6 @@ class VoucherController extends Controller
         ], 200);
     }
 
-    /**
-     * 📌 API: Memperbarui voucher berdasarkan ID
-     */
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -135,9 +120,6 @@ class VoucherController extends Controller
         ], 200);
     }
 
-    /**
-     * 📌 API: Menghapus voucher berdasarkan ID
-     */
     public function destroy($id)
     {
         $voucher = Voucher::findOrFail($id);
@@ -148,9 +130,6 @@ class VoucherController extends Controller
         ], 200);
     }
 
-    /**
-     * 📌 API: Mengambil data voucher berdasarkan grup tertentu
-     */
     public function groupData(Request $request)
     {
         $groupName = $request->query('group');

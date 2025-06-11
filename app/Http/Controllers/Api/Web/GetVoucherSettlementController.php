@@ -15,10 +15,8 @@ class GetVoucherSettlementController extends Controller
      */
     public function __invoke(Request $request)
     {
-        // Ambil parameter ID dari request
         $voucherId = $request->input('id');
 
-        // Cari voucher yang sudah settlement berdasarkan ID
         $voucher = Voucher::where('isSold', true)
             ->where('id', $voucherId)
             ->with(['orders:id,voucher_id,customer_name,customer_email'])

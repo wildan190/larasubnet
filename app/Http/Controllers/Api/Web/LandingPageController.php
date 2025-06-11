@@ -195,7 +195,7 @@ class LandingPageController extends Controller
         // Generate PDF
         $pdf = PDF::loadView('pdf.voucher-multiple', ['order' => $order]);
 
-        $fileName = 'Voucher_' . $order->order_number . '.pdf';
+        $fileName = 'Voucher_'.$order->order_number.'.pdf';
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();

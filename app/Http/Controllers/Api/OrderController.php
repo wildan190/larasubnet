@@ -2,28 +2,26 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        // Eager loading untuk menghindari N+1 problem
         $query = Order::with(['orderItems.voucher', 'transaction']);
 
-        // Optional filtering
         if ($request->filled('order_number')) {
-            $query->where('order_number', 'like', '%' . $request->order_number . '%');
+            $query->where('order_number', 'like', '%'.$request->order_number.'%');
         }
 
         if ($request->filled('customer_email')) {
-            $query->where('customer_email', 'like', '%' . $request->customer_email . '%');
+            $query->where('customer_email', 'like', '%'.$request->customer_email.'%');
         }
 
         if ($request->filled('customer_name')) {
-            $query->where('customer_name', 'like', '%' . $request->customer_name . '%');
+            $query->where('customer_name', 'like', '%'.$request->customer_name.'%');
         }
 
         if ($request->filled('status')) {
@@ -42,6 +40,7 @@ class OrderController extends Controller
                 'status' => $order->status,
                 'vouchers' => $order->orderItems->map(function ($item) {
                     $voucher = $item->voucher;
+
                     return $voucher ? [
                         'id' => $voucher->id,
                         'voucher_code' => $voucher->voucher_code,
@@ -52,7 +51,7 @@ class OrderController extends Controller
                         'size' => $voucher->size,
                         'isSold' => $voucher->isSold,
                     ] : null;
-                })->filter(), // Hapus null jika ada
+                })->filter(),
                 'transaction' => [
                     'transaction_number' => optional($order->transaction)->transaction_number,
                     'created_at' => optional($order->transaction)->created_at,

@@ -3,19 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
-    /**
-     * 📌 API: Menampilkan data user saat ini (edit profile data)
-     */
     public function edit(Request $request)
     {
-        $user = $request->user(); // ambil user dari token/session API
+        $user = $request->user();
 
         if (! $user) {
             return response()->json(['message' => 'Unauthorized'], 401);
@@ -27,9 +23,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * 📌 API: Update profil user
-     */
     public function update(Request $request)
     {
         $user = $request->user();
