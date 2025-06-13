@@ -93,8 +93,9 @@ class LandingPageController extends Controller
                 'first_name' => $request->name,
                 'email' => $request->email,
             ],
-            'callbacks' => [
-                'finish' => 'https://latsubnet.com/order-confirmation/' . $order->id . '?orderNumber=' . $order->order_number . '&customer_name=' . urlencode($order->customer_name) . '&customer_email=' . urlencode($order->customer_email),
+            'gopay' => [
+                'enabled_callback' => true,
+                'callback_url' => "https://latsubnet.com/order-confirmation/{$order->id}?orderNumber={$order->order_number}&customer_name={$order->customer_name}&customer_email={$order->customer_email}",
             ],
         ];
 
