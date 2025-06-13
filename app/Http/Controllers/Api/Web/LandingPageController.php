@@ -114,12 +114,10 @@ class LandingPageController extends Controller
     public function handleNotification(Request $request)
     {
         $notif = $request->all();
-
         $orderId = $notif['order_id'];
         $statusCode = $notif['status_code'];
         $grossAmount = $notif['gross_amount'];
         $serverKey = config('midtrans.server_key');
-
         $inputSignature = $notif['signature_key'];
         $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
 
