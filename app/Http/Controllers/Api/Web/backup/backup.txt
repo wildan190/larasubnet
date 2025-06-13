@@ -93,9 +93,6 @@ class LandingPageController extends Controller
                 'first_name' => $request->name,
                 'email' => $request->email,
             ],
-            'callbacks' => [
-                'finish' => 'https://latsubnet.com/order-confirmation/' . $order->id . '?orderNumber=' . $order->order_number . '&customer_name=' . urlencode($order->customer_name) . '&customer_email=' . urlencode($order->customer_email),
-            ],
         ];
 
         if ($totalPrice >= 1 && $totalPrice <= 29000) {
@@ -121,7 +118,7 @@ class LandingPageController extends Controller
         $serverKey = config('midtrans.server_key');
 
         $inputSignature = $notif['signature_key'];
-        $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $expectedSignature = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         if ($inputSignature !== $expectedSignature) {
             return response()->json(['message' => 'Invalid Signature'], 403);
@@ -129,7 +126,7 @@ class LandingPageController extends Controller
 
         $order = Order::where('order_number', $orderId)->first();
 
-        if (!$order) {
+        if (! $order) {
             return response()->json(['message' => 'Order not found'], 404);
         }
 
@@ -163,14 +160,14 @@ class LandingPageController extends Controller
                 'orderItems' => $order->orderItems,
             ]);
 
-            if (!Storage::disk('public')->exists('vouchers')) {
+            if (! Storage::disk('public')->exists('vouchers')) {
                 Storage::disk('public')->makeDirectory('vouchers');
             }
 
-            $fileName = 'Voucher_' . $order->order_number . '.pdf';
-            Storage::disk('public')->put('vouchers/' . $fileName, $pdf->output());
+            $fileName = 'Voucher_'.$order->order_number.'.pdf';
+            Storage::disk('public')->put('vouchers/'.$fileName, $pdf->output());
 
-            $downloadUrl = url('/api/download-pdf/' . $order->order_number);
+            $downloadUrl = url('/api/download-pdf/'.$order->order_number);
 
             return response()->json([
                 'message' => 'Notification received',
@@ -189,18 +186,16 @@ class LandingPageController extends Controller
 
     public function downloadPDF($order_number)
     {
-        $order = Order::with(['orderItems.voucher'])
-            ->where('order_number', $order_number)
-            ->first();
+        $order = Order::with(['orderItems.voucher'])->where('order_number', $order_number)->first();
 
-        if (!$order) {
+        if (! $order) {
             return response()->json(['message' => 'Order tidak ditemukan.'], 404);
         }
 
         // Generate PDF
         $pdf = Pdf::loadView('pdf.voucher-multiple', ['order' => $order]);
 
-        $fileName = 'Voucher_' . $order->order_number . '.pdf';
+        $fileName = 'Voucher_'.$order->order_number.'.pdf';
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
@@ -211,7 +206,7 @@ class LandingPageController extends Controller
     {
         $voucher = Voucher::find($id);
 
-        if (!$voucher || $voucher->isSold) {
+        if (! $voucher || $voucher->isSold) {
             return response()->json(['message' => 'Voucher not found'], 404);
         }
 
